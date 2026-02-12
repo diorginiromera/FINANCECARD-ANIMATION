@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Carteira Digital Animada</title>
+    <style>
+        :root {
+            --bg-color: #f8f5f0;
+            --wallet-bg: #000000;
+            --razor-color: #5d6edb;
+            --paypal-color: #ffffff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Container da Carteira */
+        .wallet {
+            width: 280px;
+            height: 320px;
+            background-color: var(--wallet-bg);
+            border-radius: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 25px;
+            box-sizing: border-box;
+            color: white;
+            cursor: pointer;
+            overflow: visible;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Parte frontal da carteira (para esconder os cartões) */
+        .wallet::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70%;
+            background: var(--wallet-bg);
+            border-radius: 0 0 30px 30px;
+            z-index: 10;
+        }
+
+        /* Estilo comum dos cartões */
+        .card {
+            width: 230px;
+            height: 140px;
+            border-radius: 15px;
+            position: absolute;
+            left: 25px;
+            top: 40px;
+            padding: 15px;
+            box-sizing: border-box;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-razor { background-color: var(--razor-color); color: white; transform: translateY(0) rotate(0); }
+        .card-paypal { background-color: var(--paypal-color); color: #003087; transform: translateY(20px); border: 1px solid #ddd; }
+
+        /* Animação de Saída */
+        .wallet.active .card-razor {
+            transform: translateY(-130px) rotate(-10deg);
+            z-index: 15;
+        }
+
+        .wallet.active .card-paypal {
+            transform: translateY(-80px) rotate(5deg);
+            z-index: 16;
+        }
+
+        /* Texto de Saldo */
+        .balance-container {
+            position: relative;
+            z-index: 20; /* Sempre acima de tudo */
+            margin-bottom: 10px;
+        }
+
+        .total-label {
+            font-size: 12px;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .amount {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .card-label { font-size: 10px; font-weight: bold; align-self: flex-end; }
+    </style>
+</head>
+<body>
+
+    <div class="wallet" onclick="toggleWallet()">
+        <div class="card card-razor">
+            <span class="card-label">Razorpay</span>
+            <div>
+                <div style="font-size: 10px; opacity: 0.8;">Balance</div>
+                <div style="font-weight: bold;">$55,000</div>
+            </div>
+        </div>
+
+        <div class="card card-paypal">
+            <span class="card-label">PayPal</span>
+            <div>
+                <div style="font-size: 10px; opacity: 0.6;">Balance</div>
+                <div style="font-weight: bold;">$95,000</div>
+            </div>
+        </div>
+
+        <div class="balance-container">
+            <p class="amount" id="main-balance">$150,000</p>
+            <p class="total-label">Total Balance</p>
+        </div>
+    </div>
+
+    <script>
+        let isActive = false;
+        const balanceElement = document.getElementById('main-balance');
+        const targetValue = 150000;
+
+        function toggleWallet() {
+            isActive = !isActive;
+            const wallet = document.querySelector('.wallet');
+            
+            if (isActive) {
+                wallet.classList.add('active');
+                animateValue(targetValue, 0, 600);
+            } else {
+                wallet.classList.remove('active');
+                animateValue(0, targetValue, 600);
+            }
+        }
+
+        function animateValue(start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = Math.floor(progress * (end - start) + start);
+                
+                // Formatação simples de moeda
+                balanceElement.innerHTML = `$${current.toLocaleString()}`;
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    </script>
+</body>
+</html>
